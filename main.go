@@ -1,39 +1,50 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 )
 
-type Page struct {
-	Title string
-	Body  []byte
+type SuccessResponse struct {
+	Message string `json:"message"`
 }
 
-func (p *Page) save() error {
-	filename := p.Title + ".txt"
-	return os.WriteFile(filename, p.Body, 0600)
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
-func loadPage(title string) (*Page, error) {
-	filename := title + ".txt"
-	body, err := os.ReadFile(filename)
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	resp := ErrorResponse{Error: "Page was not found at all"}
+	data, err := json.Marshal(resp)
 	if err != nil {
-		return nil, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	return &Page{Title: title, Body: body}, nil
+	w.WriteHeader(http.StatusNotFound)
+	w.Write(data)
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/view/"):]
-	p, _ := loadPage(title)
-	fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body)
+func signupHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	resp := SuccessResponse{
+		Message: "Got signup endpoint",
+	}
+
+	err := json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
-	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/signup", signupHandler)
+	http.HandleFunc("/", notFoundHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
