@@ -2,13 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"go-auth/api/handler/signIn"
 	"log"
 	"net/http"
 )
-
-type SuccessResponse struct {
-	Message string `json:"message"`
-}
 
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -28,23 +25,8 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func signupHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	resp := SuccessResponse{
-		Message: "Got signup endpoint",
-	}
-
-	err := json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func main() {
-	http.HandleFunc("/signup", signupHandler)
+	http.HandleFunc("/signup", signIn.Post)
 	http.HandleFunc("/", notFoundHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
