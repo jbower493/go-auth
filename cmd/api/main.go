@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"go-auth/api/handler/signIn"
+	"go-auth/api/handler/signup"
 	"log"
 	"net/http"
 )
@@ -26,7 +26,7 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/signup", signIn.Post)
+	http.HandleFunc("POST /signup", signup.Post)
 	http.HandleFunc("/", notFoundHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

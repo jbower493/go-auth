@@ -1,4 +1,4 @@
-package signIn
+package signup
 
 import (
 	"encoding/json"
